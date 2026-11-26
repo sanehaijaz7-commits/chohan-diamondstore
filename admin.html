@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chohan Diamond Store - Admin</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #090909;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  padding: 22px;
+  background: #141414;
+  border-bottom: 1px solid #b8862b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: bold;
+  color: #edbd53;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 35px auto;
+  padding: 20px;
+}
+
+.card {
+  background: #171717;
+  border: 1px solid #76551c;
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 25px;
+}
+
+h2 {
+  color: #edbd53;
+}
+
+input, select {
+  width: 100%;
+  padding: 13px;
+  margin: 9px 0 18px;
+  background: #090909;
+  border: 1px solid #8b682b;
+  color: white;
+  border-radius: 7px;
+}
+
+button {
+  background: linear-gradient(90deg,#b17a1c,#f1cf70);
+  color: black;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 7px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: .85;
+}
+
+.logout {
+  background: #8b2525;
+  color: white;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 15px;
+}
+
+.stat {
+  background: #222;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  border: 1px solid #604719;
+}
+
+.stat strong {
+  display: block;
+  font-size: 27px;
+  color: #edbd53;
+  margin-top: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 650px;
+}
+
+th,td {
+  padding: 13px;
+  border-bottom: 1px solid #444;
+  text-align: left;
+}
+
+th {
+  color: #edbd53;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+#dashboard {
+  display: none;
+}
+
+#message {
+  color: #edbd53;
+  margin-top: 15px;
+}
+
+@media(max-width:600px) {
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  header {
+    padding: 15px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">◆ CHOHAN DIAMOND STORE</div>
+  <button class="logout" id="logoutBtn" style="display:none">
+    LOGOUT
+  </button>
+</header>
+
+<div class="container">
+
+<section class="card" id="loginBox">
+  <h2>Admin Login</h2>
+
+  <form id="loginForm">
+    <label>Username</label>
+    <input id="username" required placeholder="Admin username">
+
+    <label>Password</label>
+    <input id="password" type="password" required placeholder="Admin password">
+
+    <button type="submit">LOGIN TO DASHBOARD</button>
+  </form>
+
+  <p id="message"></p>
+</section>
+
+<section id="dashboard">
+
+  <div class="card">
+    <h2>Dashboard Overview</h2>
+
+    <div class="stats">
+      <div class="stat">
+        Total Orders
+        <strong id="totalOrders">0</strong>
+      </div>
+
+      <div class="stat">
+        Paid Orders
+        <strong id="paidOrders">0</strong>
+      </div>
+
+      <div class="stat">
+        Pending Orders
+        <strong id="pendingOrders">0</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Customer Orders</h2>
+
+    <button onclick="loadOrders()">REFRESH ORDERS</button>
+
+    <p id="orderMessage"></p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Player UID</th>
+            <th>Package</th>
+            <th>Amount</th>
+<th>Transaction ID</th>
+<th>Status</th>
+<th>Update</th>
+            
+            
+          </tr>
+        </thead>
+
+        <tbody id="ordersTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+</section>
+
+</div>
+
+<script>
+
+const loginBox = document.getElementById("loginBox");
+const dashboard = document.getElementById("dashboard");
+const message = document.getElementById("message");
+
+document.getElementById("loginForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  message.textContent = "Checking login...";
+
+  try {
+    const response = await fetch("/api/admin/login", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      credentials: "same-origin",
+      body: JSON.stringify({
+        username: document.getElementById("username").value,
+        password: document.getElementById("password").value
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      message.textContent = data.error || "Login failed.";
+      return;
+    }
+
+    loginBox.style.display = "none";
+    dashboard.style.display = "block";
+    document.getElementById("logoutBtn").style.display = "block";
+
+    loadOrders();
+
+  } catch {
+    message.textContent = "Server connection failed.";
+  }
+});
+
+async function loadOrders() {
+
+  const output = document.getElementById("orderMessage");
+  const table = document.getElementById("ordersTable");
+
+  output.textContent = "Loading orders...";
+
+  try {
+
+    const response = await fetch("/api/admin/orders", {
+      credentials: "same-origin"
+    });
+
+    if (!response.ok) {
+      output.textContent = "Unable to load orders. Please login again.";
+      return;
+    }
+
+    const orders = await response.json();
+
+    document.getElementById("totalOrders").textContent = orders.length;
+
+    document.getElementById("paidOrders").textContent =
+      orders.filter(o => o.status === "paid").length;
+
+    document.getElementById("pendingOrders").textContent =
+      orders.filter(o => o.status === "awaiting_payment").length;
+
+    table.replaceChildren();
+
+    orders.forEach(order => {
+
+      const row = document.createElement("tr");
+
+     const values = [
+  order.id,
+  order.player_uid,
+  order.package_name,
+  "Rs. " + order.amount_pkr,
+  order.payment_reference || "Not submitted",
+  order.status
+]; 
+        
+        
+        
+        
+        
+      
+
+      values.forEach(value => {
+        const cell = document.createElement("td");
+        cell.textContent = value;
+        row.appendChild(cell);
+      });
+
+      const actionCell = document.createElement("td");
+
+      const select = document.createElement("select");
+
+      [
+        "awaiting_payment",
+        "paid",
+        "processing",
+        "completed",
+        "rejected"
+      ].forEach(status => {
+        const option = document.createElement("option");
+        option.value = status;
+        option.textContent = status;
+        if (status === order.status) option.selected = true;
+        select.appendChild(option);
+      });
+
+      const update = document.createElement("button");
+      update.textContent = "UPDATE";
+
+      update.addEventListener("click", () => {
+        updateOrder(order.id, select.value);
+      });
+
+    actionCell.appendChild(select);
+actionCell.appendChild(update);
+row.appendChild(actionCell);
+
+table.appendChild(row);
+
+});
+
+output.textContent = orders.length + " orders loaded.";
+
+
+
+
+
+
+
+
+    
+    
+
+      
+
+    
+
+    
+
+  } catch {
+    output.textContent = "Could not connect to server.";
+  }
+}
+
+async function updateOrder(id, status) {
+
+  const output = document.getElementById("orderMessage");
+  output.textContent = "Updating order...";
+
+  try {
+
+    const response = await fetch("/api/admin/orders/" + id, {
+      method: "PATCH",
+      headers: {"Content-Type":"application/json"},
+      credentials: "same-origin",
+      body: JSON.stringify({status})
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      output.textContent = data.error || "Update failed.";
+      return;
+    }
+
+    output.textContent = "Order updated successfully.";
+    loadOrders();
+
+  } catch {
+    output.textContent = "Server connection failed.";
+  }
+}
+
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+
+  await fetch("/api/admin/logout", {
+    method: "POST",
+    credentials: "same-origin"
+  });
+
+  location.reload();
+
+});
+
+</script>
+
+</body>
+</html>

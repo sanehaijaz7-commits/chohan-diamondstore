@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chohan Diamond Store</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="gem">◆</span> CHOHAN <b>DIAMOND STORE</b></div>
+    <span class="tag">GAMING TOP-UP STORE</span>
+  </header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">FAST • SIMPLE • SECURE</p>
+      <h1>Top up your game.<br><span>Own the moment.</span></h1>
+      <p class="sub">Choose a package and submit your player UID to start an order.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Choose Diamonds</h2>
+      <div class="packages">
+        <button class="package selected" data-package="100"><strong>100</strong><span>DIAMONDS</span><small>PKR —100 set price</small></button>
+        <button class="package" data-package="310"><strong>310</strong><span>DIAMONDS</span><small>PKR —310 set price</small></button>
+        <button class="package" data-package="520"><strong>520</strong><span>DIAMONDS</span><small>PKR520 — set price</small></button>
+      </div>
+      <form id="orderForm">
+        <label for="uid">Player UID</label>
+        <input id="uid" name="uid" inputmode="numeric" placeholder="Enter your player UID" required>
+        <button class="gold-btn" type="submit">CONTINUE TO ORDER</button>
+        <p id="notice" role="status"></p>
+      </form>
+    </section>
+
+    <section class="info-grid">
+      <article><span>01</span><h3>Select package</h3><p>Choose the diamond package you want.</p></article>
+      <article><span>02</span><h3>Secure payment</h3><p>Checkout will activate after merchant gateway setup.</p></article>
+      <article><span>03</span><h3>Order processing</h3><p>Orders are processed only after verified payment and authorized fulfilment.</p></article>
+    </section>
+    <p class="disclaimer">Independent third-party store; not affiliated with or endorsed by Garena or Free Fire. Use only authorized top-up and payment providers.</p>
+  </main>
+  <footer>© <span id="year"></span> Chohan Diamond Store</footer>
+  <script src="app.js"></script>
+</body>
+</html>
