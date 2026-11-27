@@ -322,8 +322,4 @@ app.patch("/api/admin/orders/:id", requireAdmin, (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-    console.log(
-        `Chohan Diamond Store running at http://localhost:${PORT}`
-    );
 });
