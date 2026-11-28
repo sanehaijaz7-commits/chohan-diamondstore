@@ -58,6 +58,12 @@ app.use("/api/", rateLimit({
 
 // Website files
 app.use(express.static(path.join(__dirname, "public")));
+const siteFile = (f) => (req, res) => res.sendFile(path.join(__dirname, f));
+app.get("/", siteFile("index.html"));
+app.get("/admin", siteFile("admin.html"));
+app.get("/admin.html", siteFile("admin.html"));
+app.get("/style.css", siteFile("style.css"));
+app.get("/app.js", siteFile("app.js"));
 
 // Diamond packages
 const packages = {
